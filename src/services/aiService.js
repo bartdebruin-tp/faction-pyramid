@@ -2,22 +2,45 @@ import { ref } from 'vue'
 import { GoogleGenAI } from '@google/genai'
 
 const SETTINGS_STORAGE_KEY = 'faction-settings'
-const FALLBACK_API_KEY = 'AIzaSyC31c-JvsbjNTMuZFltn1svp5NJZkaVphk'
 
 function getApiKey() {
   try {
     const stored = localStorage.getItem(SETTINGS_STORAGE_KEY)
     if (stored) {
       const settings = JSON.parse(stored)
-      return settings.geminiApiKey || FALLBACK_API_KEY
+      return settings.geminiApiKey || ''
     }
   } catch (err) {
     console.error('Error loading API key from localStorage:', err)
   }
-  return FALLBACK_API_KEY
+  return ''
 }
 
+function checkApiKey() {
+  try {
+    const stored = localStorage.getItem(SETTINGS_STORAGE_KEY)
+    if (stored) {
+      const settings = JSON.parse(stored)
+      return !!(settings.geminiApiKey && settings.geminiApiKey.trim())
+    }
+  } catch (err) {
+    console.error('Error checking API key from localStorage:', err)
+  }
+  return false
+}
+
+const hasApiKey = ref(checkApiKey())
 const isGenerating = ref(false)
+
+// Update hasApiKey when storage changes
+window.addEventListener('storage', () => {
+  hasApiKey.value = checkApiKey()
+})
+
+// Also provide a function to manually refresh the API key status
+export function refreshApiKeyStatus() {
+  hasApiKey.value = checkApiKey()
+}
 
 export async function generateWithAi(prompt) {
   try {
@@ -38,4 +61,4 @@ export async function generateWithAi(prompt) {
   }
 }
 
-export { isGenerating }
+export { isGenerating, hasApiKey }

@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue'
+import { refreshApiKeyStatus } from '../services/aiService'
 
 const props = defineProps({
   isOpen: {
@@ -51,6 +52,7 @@ const closeModal = () => {
 
 const saveSettingsAndClose = () => {
   saveSettings()
+  refreshApiKeyStatus()
   closeModal()
 }
 </script>

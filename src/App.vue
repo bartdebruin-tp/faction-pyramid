@@ -48,7 +48,7 @@ function closeSettings() {
         <TextareaComponent 
           name="Members" 
           description="Describe the members" 
-          :prompt="`Generate a description of the members of the faction '${factionStore.factionName}' `+ (factionStore.summary.length > 50 ? `which is about ${factionStore.summary}` : '') + `. Include their types, roles, and characteristics. Keep it concise (2-3 sentences) and only use words, no markdown.`"
+          :prompt="`Generate a list of the hierarchy of the faction '${factionStore.factionName}' `+ (factionStore.summary.length > 50 ? `which is about ${factionStore.summary}` : '') + `. Include their types, roles, and characteristics. Keep each list item concise (1-3 words) and only output the list, no markdown.`"
           v-model="factionStore.members" 
         />
         <TextareaComponent 

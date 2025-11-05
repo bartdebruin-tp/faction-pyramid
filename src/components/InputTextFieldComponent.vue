@@ -1,6 +1,6 @@
 <script setup>
 import { useFactionStore } from '../stores/faction'
-import { generateWithAi as generateAiContent, isGenerating } from '../services/aiService'
+import { generateWithAi as generateAiContent, isGenerating, hasApiKey } from '../services/aiService'
 
 const factionStore = useFactionStore()
 const model = defineModel()
@@ -32,8 +32,10 @@ async function generateWithAi() {
     <div class="flex items-center justify-between mb-2">
       <label :for="createIdentifier(props.name)" class="block text-sm font-medium text-gray-900 dark:text-white">{{ props.name }}</label>
       <button 
+        v-if="hasApiKey"
         @click="generateWithAi" 
         :disabled="isGenerating"
+        :title="prompt"
         class="px-3 py-1 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
       >
         <span v-if="!isGenerating">AI</span>
