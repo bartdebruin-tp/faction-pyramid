@@ -1,7 +1,8 @@
 <script setup>
-import { ref, reactive, onMounted, computed, inject, watch } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, watch } from 'vue'
+import { useFactionStore } from '../stores/faction'
 
-const datamodel = inject('datamodel')
+const factionStore = useFactionStore()
 
 const canvasRef = ref(null)
 const ctx = ref(null)
@@ -40,6 +41,11 @@ onMounted(() => {
     // Load nodes from datamodel
     loadFromDatamodel()
   }
+  window.addEventListener('keydown', handleKeyDown)
+})
+onUnmounted(() => {
+  window.removeEventListener('resize', resizeCanvas)
+  window.removeEventListener('keydown', handleKeyDown)
 })
 
 // Load nodes from datamodel.pyramid
@@ -48,7 +54,7 @@ const loadFromDatamodel = () => {
   nodes.splice(0, nodes.length)
   connections.splice(0, connections.length)
   
-  const pyramidData = datamodel.pyramid
+  const pyramidData = factionStore.pyramid
   
   if (!pyramidData || Object.keys(pyramidData).length === 0) {
     // Add initial root node if no data
@@ -208,8 +214,8 @@ const calculateHierarchicalLayout = (rootNodes, nodeMap, childrenMap) => {
 const syncToDatamodel = () => {
   if (isLoadingFromDatamodel) return
   
-  if (!datamodel.pyramid) {
-    datamodel.pyramid = {}
+  if (!factionStore.pyramid) {
+    factionStore.pyramid = {}
   }
   
   // Clear existing pyramid data
@@ -232,11 +238,11 @@ const syncToDatamodel = () => {
   })
   
   // Update datamodel
-  datamodel.pyramid = newPyramid
+  factionStore.pyramid = newPyramid
 }
 
 // Watch for changes in datamodel.pyramid from outside
-watch(() => datamodel.pyramid, () => {
+watch(() => factionStore.pyramid, () => {
   if (!isLoadingFromDatamodel) {
     loadFromDatamodel()
   }
@@ -659,9 +665,6 @@ const handleKeyDown = (e) => {
   }
 }
 
-onMounted(() => {
-  window.addEventListener('keydown', handleKeyDown)
-})
 </script>
 
 <template>

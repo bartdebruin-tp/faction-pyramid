@@ -1,7 +1,8 @@
 <script setup>
-import { ref, inject, watch } from 'vue'
+import { ref, watch } from 'vue'
+import { useFactionStore } from '../stores/faction'
 
-const datamodel = inject('datamodel')
+const factionStore = useFactionStore()
 
 const props = defineProps({
   isOpen: {
@@ -30,10 +31,10 @@ const nodeTooltip = ref('')
 
 // Check if the node has children
 const hasChildren = () => {
-  if (!props.nodeId || !datamodel.pyramid) return false
+  if (!props.nodeId || !factionStore.pyramid) return false
   
   // Check if any node has this node as its manager
-  return Object.entries(datamodel.pyramid).some(([id, node]) => {
+  return Object.entries(factionStore.pyramid).some(([id, node]) => {
     return id !== props.nodeId && node.manager === props.nodeId
   })
 }
@@ -41,8 +42,8 @@ const hasChildren = () => {
 // Watch for prop changes to update form fields
 watch(() => props.isOpen, (newVal) => {
   if (newVal) {
-    if (props.mode === 'edit' && props.nodeId && datamodel.pyramid[props.nodeId]) {
-      const currentData = datamodel.pyramid[props.nodeId]
+    if (props.mode === 'edit' && props.nodeId && factionStore.pyramid[props.nodeId]) {
+      const currentData = factionStore.pyramid[props.nodeId]
       nodeName.value = currentData.name || ''
       nodeRole.value = currentData.role || ''
       nodeTooltip.value = currentData.tooltip || ''
@@ -65,15 +66,15 @@ const saveNode = () => {
     return
   }
 
-  if (!datamodel.pyramid) {
-    datamodel.pyramid = {}
+  if (!factionStore.pyramid) {
+    factionStore.pyramid = {}
   }
 
   if (props.mode === 'add') {
     // Generate a unique ID
     const newNodeId = `node_${Date.now()}`
     
-    datamodel.pyramid[newNodeId] = {
+    factionStore.pyramid[newNodeId] = {
       name: nodeName.value.trim(),
       manager: props.parentId || '',
       role: nodeRole.value.trim(),
@@ -81,8 +82,8 @@ const saveNode = () => {
     }
   } else if (props.mode === 'edit' && props.nodeId) {
     // Update existing node
-    const currentData = datamodel.pyramid[props.nodeId]
-    datamodel.pyramid[props.nodeId] = {
+    const currentData = factionStore.pyramid[props.nodeId]
+    factionStore.pyramid[props.nodeId] = {
       ...currentData,
       name: nodeName.value.trim(),
       role: nodeRole.value.trim(),
@@ -109,8 +110,8 @@ const deleteNode = () => {
   }
   
   // Delete the node from datamodel
-  if (datamodel.pyramid && datamodel.pyramid[props.nodeId]) {
-    delete datamodel.pyramid[props.nodeId]
+  if (factionStore.pyramid && factionStore.pyramid[props.nodeId]) {
+    delete factionStore.pyramid[props.nodeId]
   }
   
   emit('delete')

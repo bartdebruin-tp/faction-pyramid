@@ -1,8 +1,9 @@
 <script setup>
-import { ref, onMounted, inject, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import UpdateOrganizationNodePopupComponent from './UpdateOrganizationNodePopupComponent.vue'
+import { useFactionStore } from '../stores/faction'
 
-const datamodel = inject('datamodel')
+const factionStore = useFactionStore()
 const chartDiv = ref(null)
 let chart = null
 
@@ -20,7 +21,7 @@ const addNode = (parentId) => {
 }
 
 const editNode = (nodeId) => {
-  if (!datamodel.pyramid || !datamodel.pyramid[nodeId]) return
+  if (!factionStore.pyramid || !factionStore.pyramid[nodeId]) return
   
   modalMode.value = 'edit'
   currentNodeId.value = nodeId
@@ -77,7 +78,7 @@ const drawChart = () => {
   }
 
   // Load data from datamodel.pyramid
-  const pyramidData = datamodel.pyramid
+  const pyramidData = factionStore.pyramid
   const rows = []
 
   // Check if pyramid data exists and has nodes
@@ -109,8 +110,8 @@ const drawChart = () => {
       rows.push(createChartRow(id, name, manager, role, tooltip))
 
       // Initialize datamodel with sample data if empty
-      if (!datamodel.pyramid[id]) {
-        datamodel.pyramid[id] = { name, manager, role, tooltip }
+      if (!factionStore.pyramid[id]) {
+        factionStore.pyramid[id] = { name, manager, role, tooltip }
       }
     })
   }
@@ -147,7 +148,7 @@ onMounted(() => {
 })
 
 // Watch for changes in datamodel if needed
-watch(() => datamodel.pyramid, () => {
+watch(() => factionStore.pyramid, () => {
   drawChart()
 }, { deep: true })
 </script>

@@ -1,8 +1,9 @@
 <script setup>
-import { inject, ref, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ArrowDownOnSquareIcon, CloudArrowDownIcon, CloudArrowUpIcon, TrashIcon } from '@heroicons/vue/24/solid'
+import { useFactionStore } from '../stores/faction'
 
-const datamodel = inject('datamodel')
+const factionStore = useFactionStore()
 const versions = ref([])
 const STORAGE_KEY = 'faction-datamodel-versions'
 const MAX_VERSIONS = 10
@@ -10,6 +11,7 @@ const MAX_VERSIONS = 10
 function loadVersionsFromStorage() {
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
+    console.log('Loaded versions from storage:', JSON.parse(stored))
     if (stored) {
       versions.value = JSON.parse(stored)
     }
@@ -31,7 +33,7 @@ function saveDatamodel() {
   const timestamp = new Date().toISOString()
   const newVersion = {
     timestamp,
-    data: JSON.parse(JSON.stringify(datamodel)) // Deep clone
+    data: factionStore.exportFaction() // Use the store's export method
   }
   
   // Add to beginning of array
@@ -59,7 +61,7 @@ function exportDatamodel() {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `${datamodel.factionName || 'unknown-faction'}.json`
+  a.download = `${factionStore.factionName || 'unknown-faction'}.json`
   a.click()
   URL.revokeObjectURL(url)
 }
@@ -76,7 +78,7 @@ function loadDatamodel() {
         const content = e.target.result
         try {
           const json = JSON.parse(content)
-          Object.assign(datamodel, json)
+          factionStore.loadFaction(json.latestVersion.data || {})
           
           // Clear localStorage and version history when loading a new file
           versions.value = []
@@ -93,7 +95,7 @@ function loadDatamodel() {
 
 function loadVersion(version) {
   if (version && version.data) {
-    Object.assign(datamodel, version.data)
+    factionStore.loadFaction(version.data)
   }
 }
 
@@ -107,20 +109,8 @@ function clearDatamodel() {
     return
   }
   
-  // Reset to default state
-  Object.assign(datamodel, {
-    version: 3,
-    factionName: "New Faction",
-    summary: "",
-    mastermind: "",
-    motivations: "",
-    members: "",
-    methods: "",
-    machinations: "",
-    mysteries: "",
-    notes: "",
-    pyramid: {}
-  })
+  // Reset to default state using the store's reset method
+  factionStore.resetFaction()
   
   // Clear version history
   versions.value = []
@@ -155,19 +145,19 @@ onMounted(() => {
               </button>
           </li>
           <li>
-              <button @click="saveDatamodel" type="button" class="flex items-center w-full p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+              <button @click="exportDatamodel" type="button" class="flex items-center w-full p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                   <ArrowDownOnSquareIcon class="size-6" />
                   <span class="ml-3">Export JSON</span>
               </button>
           </li>
           <li>
-              <button @click="exportDatamodel" type="button" class="flex items-center w-full p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+              <button @click="alert('Export Mermaid')" type="button" class="flex items-center w-full p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                   <ArrowDownOnSquareIcon class="size-6" />
                   <span class="ml-3">Export Mermaid</span>
               </button>
           </li>
           <li>
-              <button @click="saveDatamodel" type="button" class="flex items-center w-full p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+              <button @click="alert('Export Mermaid')" type="button" class="flex items-center w-full p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                   <ArrowDownOnSquareIcon class="size-6" />
                   <span class="ml-3">Export MarkDown</span>
               </button>

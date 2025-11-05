@@ -1,6 +1,9 @@
 <script setup>
 import { ref, onMounted, watch, nextTick } from 'vue'
+import { useFactionStore } from '../stores/faction'
+import { generateWithAi as generateAiContent, isGenerating } from '../services/aiService'
 
+const factionStore = useFactionStore()
 const model = defineModel()
 const textareaRef = ref(null)
 
@@ -28,12 +31,34 @@ watch(model, async () => {
   await nextTick()
   adjustHeight()
 })
+
+async function generateWithAi() {
+  try {
+    const text = await generateAiContent(props.name, factionStore.exportFaction())
+    model.value = text
+    await nextTick()
+    adjustHeight()
+  } catch (error) {
+    // Error already logged in service
+  }
+}
+
 </script>
 
 <template>
   
   <div class="w-full">
-      <label :for="createIdentifier(props.name)" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ props.name }}</label>
+    <div class="flex items-center justify-between mb-2">
+      <label :for="createIdentifier(props.name)" class="block text-sm font-medium text-gray-900 dark:text-white">{{ props.name }}</label>
+      <button 
+        @click="generateWithAi" 
+        :disabled="isGenerating"
+        class="px-3 py-1 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
+      >
+        <span v-if="!isGenerating">AI</span>
+        <span v-else>Generating...</span>
+      </button>
+    </div>
       <textarea 
         ref="textareaRef"
         :id="createIdentifier(props.name)" 
