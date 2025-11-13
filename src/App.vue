@@ -1,8 +1,8 @@
 <script setup>
 import { ref } from 'vue'
 import { useFactionStore } from './stores/faction'
-import SettingsPopupComponent from './components/SettingsPopupComponent.vue'
-import InputTextFieldComponent from './components/InputTextFieldComponent.vue'
+import SettingsPopupComponent from './components/Popup/SettingsPopupComponent.vue'
+import InputTextFieldComponent from './components/FormElements/InputTextFieldComponent.vue'
 
 const factionStore = useFactionStore()
 const isSettingsOpen = ref(false)
